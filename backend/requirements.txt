@@ -1,0 +1,8 @@
+fastapi[standard]
+schemathesis
+pytest
+uvicorn
+python-dotenv
+pytest-cov
+httpx
+pydantic[email]
