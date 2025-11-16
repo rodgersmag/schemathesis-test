@@ -5,4 +5,5 @@ uvicorn
 python-dotenv
 pytest-cov
 httpx
+asyncpg
 pydantic[email]

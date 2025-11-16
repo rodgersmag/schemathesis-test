@@ -14,11 +14,11 @@ compose() {
 }
 
 usage() {
-  echo "Usage: $0 {start|rebuild|clean}" >&2
+  echo "Usage: $0 {up|rebuild|clean}" >&2
 }
 
 case "${1:-}" in
-  start)
+  up)
     compose up -d
     ;;
   rebuild)
@@ -28,6 +28,10 @@ case "${1:-}" in
   clean)
     compose down -v
     docker system prune -a -f 
+    ;;
+
+  logs)
+    compose logs -f
     ;;
   *)
     usage
