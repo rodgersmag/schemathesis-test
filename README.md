@@ -8,6 +8,8 @@
 # Testing 
 
 cd /backend 
+# create virtual environment using uv 
+uv venv
 # Install requirements 
 uv pip install -r requirements.txt
 # Run the schemathesis coverage tests 
