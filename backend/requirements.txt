@@ -1,5 +1,5 @@
 fastapi[standard]
-schemathesis
+schemathesis>=4.5.0
 pytest
 uvicorn
 python-dotenv

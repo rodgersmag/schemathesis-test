@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator, Field
+
 
 from models.user import User, UserRole
 
@@ -14,26 +15,60 @@ router = APIRouter(
 # In-memory storage for demo purposes
 users_db = {}
 
+# Standard Errors: 
+
+# Standard error responses
+STANDARD_ERRORS = {
+    400: {"description": "Bad Request - Invalid input"},
+    404: {"description": "Not found"},
+    409: {"description": "Conflict - Resource already exists"},
+    422: {"description": "Validation Error"},
+    500: {"description": "Internal Server Error"}
+}
+
 # Response models
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(
+        min_length=8,
+        description="User password (minimum 8 characters)"
+    )
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     role: UserRole = UserRole.USER
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError('Password cannot be empty or contain only whitespace')
+        return v
 
 class UserResponse(User):
     class Config:
         from_attributes = True
 
-# Routes
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {"description": "User created successfully"},
+        409: {"description": "User with this email already exists"},  # Add this explicitly if needed
+        **STANDARD_ERRORS
+    }
+)
 async def create_user(user: UserCreate):
-    """Create a new user"""
+    """Create a new user
+    
+    This endpoint creates a new user with the provided details.
+    Returns 409 if the email is already registered.
+    """
+    # Check for duplicate email (simulating database integrity constraint)
     if user.email in [u.email for u in users_db.values()]:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists"
         )
     
     # In a real app, you would hash the password here
@@ -46,10 +81,10 @@ async def create_user(user: UserCreate):
     )
     
     users_db[str(db_user.id)] = db_user
-    return db_user
+    return UserResponse.model_validate(db_user)
 
 @router.get("/", response_model=List[UserResponse])
-async def list_users(role: Optional[UserRole] = None):
+async def list_users(role: UserRole):
     """List all users, optionally filtered by role"""
     if role:
         return [user for user in users_db.values() if user.role == role]
