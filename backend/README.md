@@ -1,32 +1,18 @@
-# backend
+# Test App For Schemathesis 
 
-A project created with FastAPI CLI.
+1. Quick start run: ./setup.sh 
+2. Rebuild run: ./setup.sh rebuild 
+3. Clean run ./setup.sh clean  ***warning this deletes all ophan contianers and volumeson your machine*** 
 
-## Quick Start
 
-### Start the development server:
+# Testing 
 
-```bash
-uv run fastapi dev
-```
+cd /backend 
+# Install requirements 
+uv pip install -r requirements.txt
+# Run the schemathesis coverage tests 
+uv run pytest -v
 
-Visit http://localhost:8000
+# Run shemathesis Full tests
 
-### Deploy to FastAPI Cloud:
-
-> Reader's note: These commands are not quite ready for prime time yet, but will be soon! Join the waiting list at https://fastapicloud.com!
-
-```bash
-uv run fastapi login
-uv run fastapi deploy
-```
-
-## Project Structure
-
-- `main.py` - Your FastAPI application
-- `pyproject.toml` - Project dependencies
-
-## Learn More
-
-- [FastAPI Documentation](https://fastapi.tiangolo.com)
-- [FastAPI Cloud](https://fastapicloud.com)
+schemathesis run http://localhost:8000/openapi.json
